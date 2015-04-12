@@ -1,0 +1,9 @@
+(* Import a dataset of images from NASA *)
+ParallelTable[ImageResize[i, {50, 50}], {i,Join[
+Import["http://sohowww.nascom.nasa.gov/gallery/SolarCorona/","Images"],
+Import["http://sohowww.nascom.nasa.gov/gallery/bestofsoho.html","Images"],
+Import["http://nssdc.gsfc.nasa.gov/photo_gallery/photogallery-\mercury.html", "Images"],
+Import["http://nssdc.gsfc.nasa.gov/photo_gallery/photogallery-\venus.html", "Images"]]}]
+
+(* Partition your a selected images, then use the function Nearest to create a collage using Nasa's images
+ImageAssemble[Partition[Flatten@ParallelTable[Nearest[setofimages, i], {i,Flatten[ImagePartition[Import["http://upload.wikimedia.org/wikipedia/commons/1/1a/\Michael_collins.jpg"], 50]]}], 38]]
