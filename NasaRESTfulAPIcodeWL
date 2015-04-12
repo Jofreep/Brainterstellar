@@ -1,0 +1,51 @@
+(* Nasa provides the images from their satellites. For this project we use their RESTful service interface which follows the form of:
+
+"http://map1.vis.earthdata.nasa.gov/{Projection}/{ProductName}/default/{Time}/\
+{TileMatrixSet}/{ZoomLevel}/{TileRow}/{TileCol}.png" *)
+
+(* First we generate a string of random coordinates with RandomSample *)
+
+SeedRandom[15];
+coordinates = RandomSample[Flatten[Table[{j, i}, {j, 0, 39}, {i, 0, 79}], 1]]
+
+(* Then we map these coordinates into the website links of the satellite images provided by Nasa and create a string containing the links of all images: *)
+
+set = Map[ToString[#[[1]]] <> "/" <> ToString[#[[2]]] &, coordinates];
+
+links0 = Table[
+   "http://map1.vis.earthdata.nasa.gov/wmts-geo/MODIS_Terra_\
+CorrectedReflectance_TrueColor/default/2015-04-10/EPSG4326_250m/6/" <> i <> 
+    ".jpg", {i, set}];
+
+(* When a user at Collective Eye website starts a session a command will be sent to this program by using the following data drop function
+
+After the previous command the program will create a set of 4 images by sending the 4 links to the user interface website platform whe a user is going to evaluate
+
+After the user is selecting one picture from the set the website platform will send an automatic feedback message indicating the name one click we will get *)
+
+ParallelTable[
+ Export["/Users/bernate/Desktop/tmp2/Hackathon/SpaceApps/collectiveEye/" <> 
+   ToString[coordinates[[i, 1]]] <> "I" <> ToString[coordinates[[i, 2]]] <> 
+   ".jpg", Import[links0[[i]]]], {i, Range[Length[links0]]}]
+
+(* Time Lapse Code: *)
+
+dates = Table[
+  DateString[
+   DatePlus[DateObject[{2012, 5, 8}], i], {"Year", "-", "Month", "-", 
+    "Day"}], {i, 
+   QuantityMagnitude[DateDifference[DateObject[{2012, 5, 8}], Today]]}]
+
+ParallelTable[
+ Export["/Users/bernate/Desktop/tmp2/Hackathon/SpaceApps/Time_Lapse/" <> 
+   ToString[i] <> ".jpg", 
+  Import["http://map1.vis.earthdata.nasa.gov/wmts-geo/MODIS_Terra_\
+CorrectedReflectance_TrueColor/default/" <> ToString[i] <> 
+    "/EPSG4326_250m/6/23/67.jpg"]], {i, dates}]
+
+(* Set the current directory to import all the images and generate the gif timelapse: *)
+
+SetDirectory[NotebookDirectory[]]
+
+(* Generate the timelapse *)
+Export["tL.gif", Table[Import[i], {i, FileNames["*.jpg"]}]]
